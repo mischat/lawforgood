@@ -83,6 +83,8 @@ def handle_recording():
     """Play back the caller's recording."""
 
     recording_url = request.values.get('RecordingUrl', None)
+    recording_url_mp3 = recording_url + '.mp3'
+    print('This is the recording of the phone call ' + recording_url_mp3)
 
     resp = twilio.twiml.Response()
     resp.say('Thanks for recording ... take a listen to what you howled.')
