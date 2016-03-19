@@ -1,7 +1,8 @@
 #!venv/bin/python
 
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect, jsonify
 import twilio.twiml
+from twilio.rest import TwilioRestClient
 import datetime
 import json
 from googleapiclient.discovery import build
@@ -21,8 +22,36 @@ SUBSCRIPTION_KEY = 'YOUR_AI_API_SUBSCRIPTION_KEY_HERE'
 AWS_ACCESS_KEY_ID = 'YOUR_AWS_ACCESS_KEY_ID_HERE'
 AWS_SECRET_ACCESS_KEY = 'YOUR_AWS_SECRET_ACCESS_KEY_HERE'
 
+SMS_ACCOUNT_SID = 'YOUR_SMS_ACCOUNT_SID_HERE'
+SMS_AUTH_TOKEN = 'YOUR_SMS_AUTH_TOKEN_HERE'
+
 service = build('translate', 'v2',
                 developerKey=GOOGLE_TRANSLATE_API_KEY)
+
+
+@app.route('/sms/send', methods=['POST'])
+def send_sms():
+
+    sms_to = request.json.get('to')
+    sms_body = request.json.get('body')
+    sms_lang = request.json.get('lang')
+
+    account_sid = SMS_ACCOUNT_SID
+    auth_token = SMS_AUTH_TOKEN
+    client = TwilioRestClient(account_sid, auth_token)
+
+    gt = service.translations().list(
+        target=sms_lang,
+        q=[sms_body]
+    ).execute()
+
+    translated_body = gt['translations'][0]['translatedText']
+
+    client.messages.create(body=translated_body,
+                           to=sms_to,
+                           from_='+441253531170')
+
+    return jsonify({'status': 'done'}), 201
 
 
 @app.route('/sms/reply', methods=['GET', 'POST'])
