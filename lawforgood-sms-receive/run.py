@@ -1,6 +1,6 @@
 #!venv/bin/python
 
-from flask import Flask, request
+from flask import Flask, request, redirect
 import twilio.twiml
 import datetime
 import json
@@ -54,7 +54,40 @@ def voice_hello_monkey():
     """Respond to incoming calls with a simple text message."""
 
     resp = twilio.twiml.Response()
-    resp.message('Hello, Voice Monkey')
+    resp.say('Hello, This is Hackney Law Help Center')
+
+    with resp.gather(numDigits=1, action='/handle-key', method='POST') as g:
+        g.say("""To record a message press 1""")
+
+    return str(resp)
+
+
+@app.route('/handle-key', methods=['GET', 'POST'])
+def handle_key():
+    """Handle key press from a user."""
+
+    digit_pressed = request.values.get('Digits', None)
+    if digit_pressed == '2':
+        resp = twilio.twiml.Response()
+        resp.say('Record your message after the tone.')
+        resp.record(maxLength='30', action='/handle-recording')
+        return str(resp)
+
+    # If the caller pressed anything but 1, redirect them to the homepage.
+    else:
+        return redirect('/voice/reply')
+
+
+@app.route('/handle-recording', methods=['GET', 'POST'])
+def handle_recording():
+    """Play back the caller's recording."""
+
+    recording_url = request.values.get('RecordingUrl', None)
+
+    resp = twilio.twiml.Response()
+    resp.say('Thanks for recording ... take a listen to what you howled.')
+    resp.play(recording_url)
+    resp.say('Goodbye.')
     return str(resp)
 
 
