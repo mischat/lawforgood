@@ -9,7 +9,7 @@ from googleapiclient.discovery import build
 app = Flask(__name__)
 
 service = build('translate', 'v2',
-            developerKey='YOUR_GOOGLE_TRANSLATE_API_KEY_HERE')
+                developerKey='YOUR_GOOGLE_TRANSLATE_API_KEY_HERE')
 
 
 @app.route('/sms/reply', methods=['GET', 'POST'])
@@ -21,8 +21,8 @@ def hello_monkey():
     sms_time = str(datetime.datetime.utcnow().isoformat())
 
     gt = service.translations().list(
-      target='en',
-      q=[sms_body]
+        target='en',
+        q=[sms_body]
     ).execute()
 
     language_id = gt['translations'][0]['detectedSourceLanguage']
@@ -52,12 +52,12 @@ def hello_monkey():
 @app.route('/voice/reply', methods=['GET', 'POST'])
 def voice_hello_monkey():
     """Respond to incoming calls with a simple text message."""
-           
+
     resp = twilio.twiml.Response()
     resp.message('Hello, Voice Monkey')
     return str(resp)
 
-                    
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
 
