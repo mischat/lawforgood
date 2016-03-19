@@ -9,19 +9,28 @@ import urllib
 import os
 import time
 import apiai
+import boto
+import boto.s3
+import sys
+from boto.s3.key import Key
 
 
 app = Flask(__name__)
 
-service = build('translate', 'v2',
-                developerKey='YOUR_GOOGLE_TRANSLATE_API_KEY_HERE')
+GOOGLE_TRANSLATE_API_KEY = 'YOUR_GOOGLE_TRANSLATE_API_KEY_HERE'
 
 CLIENT_ACCESS_TOKEN = 'YOUR_AI_API_CLIENT_ACCESS_TOKEN_HERE'
 SUBSCRIPTION_KEY = 'YOUR_AI_API_SUBSCRIPTION_KEY_HERE'
 
+AWS_ACCESS_KEY_ID = 'YOUR_AWS_ACCESS_KEY_ID_HERE'
+AWS_SECRET_ACCESS_KEY = 'YOUR_AWS_SECRET_ACCESS_KEY_HERE'
+
+service = build('translate', 'v2',
+                developerKey=)
+
 
 @app.route('/sms/reply', methods=['GET', 'POST'])
-def hello_monkey():
+def handle_sms():
     """Respond to incoming calls with a simple text message."""
 
     sms_body = str(request.args['Body'])
@@ -75,16 +84,14 @@ def hello_monkey():
 
 
 @app.route('/voice/reply', methods=['GET', 'POST'])
-def voice_hello_monkey():
+def handle_voice():
     """Respond to incoming calls with a simple text message."""
 
     resp = twilio.twiml.Response()
     resp.say('Hello, welcome to the Hackney Community Law Center')
 
     with resp.gather(numDigits=1, action='/handle-key', method='POST') as g:
-        g.say("""To record a voice message in English please press 1
-              otherwise please text us in the language of your choice to
-                01253531170 thanks you""")
+        g.say("""To record a voice message in English please press 1 otherwise please text us in the language of your choice to 01253531170 thanks you""")
 
     return str(resp)
 
@@ -137,7 +144,7 @@ def handle_wave():
 
     print output
 
-    curl_wav = os.popen('curl -k -F "request={\'timezone\':\'America/New_York\',\'lang\':\'en\'};type=application/json" -F "voiceData=@/tmp/working.' + epoch_filename + ';type=audio/wav" -H "Authorization: Bearer 0e010641a9db48eb8f53079054de0526" -H "ocp-apim-subscription-key: 5c0f3443-00dd-4da5-8a19-f39d8b934956" "https://api.api.ai/v1/query?v=20150910"').read()
+    curl_wav = os.popen('curl -k -F "request={\'timezone\':\'Europe/London\',\'lang\':\'en\'};type=application/json" -F "voiceData=@/tmp/working.' + epoch_filename + ';type=audio/wav" -H "Authorization: Bearer 0e010641a9db48eb8f53079054de0526" -H "ocp-apim-subscription-key: 5c0f3443-00dd-4da5-8a19-f39d8b934956" "https://api.api.ai/v1/query?v=20150910"').read()
 
     print curl_wav
 
