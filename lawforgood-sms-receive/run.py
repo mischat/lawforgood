@@ -42,10 +42,15 @@ def hello_monkey():
 
     ai_request.query = translated_body
 
-    ai_response = ai_request.getresponse()
+    ai_response = ai_request.getresponse().read()
     ai_response_dict = json.loads(ai_response)
 
-    ai_intent_id = ai_response_dict['metadata']['intentId']
+    ai_intent_id = ''
+    try:
+        ai_intent_id = ai_response_dict['result']['metadata']['intentId']
+    except KeyError:
+        # Key is not present
+        pass
 
     data = {'from': sms_from,
             'original-body': sms_body,
