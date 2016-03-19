@@ -70,12 +70,34 @@ def handle_key():
     if digit_pressed == '1':
         resp = twilio.twiml.Response()
         resp.say('Record your message after the tone and please press the hash key to stop recording')
-        resp.record(maxLength='30', action='/handle-recording', finishOnKey='#', transcribe='true')
+        resp.record(maxLength='30',
+                    #action='/handle-recording',
+                    transcribeCallback='/handle-transcribe',
+                    finishOnKey='#',
+                    transcribe='true')
         return str(resp)
 
     # If the caller pressed anything but 1, redirect them to the homepage.
     else:
         return redirect('/voice/reply')
+
+
+@app.route('/handle-transcribe', methods=['GET', 'POST'])
+def handle_recording():
+    """Play back the caller's recording."""
+
+    transcription_text = request.values.get('TranscriptionText', None)
+    recording_url = request.values.get('RecordingUrl', None)
+    recording_url_mp3 = recording_url + '.mp3'
+
+    print('This is the recording of the phone call ' + recording_url_mp3)
+    print('This is the transcription text ' + transcription_text)
+
+    resp = twilio.twiml.Response()
+    resp.say('Thanks for recording ... take a listen to what you howled.')
+    resp.play(recording_url)
+    resp.say('Goodbye.')
+    return str(resp)
 
 
 @app.route('/handle-recording', methods=['GET', 'POST'])
