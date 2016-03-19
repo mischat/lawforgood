@@ -45,12 +45,13 @@ def hello_monkey():
     ai_response = ai_request.getresponse()
     ai_response_dict = json.loads(ai_response)
 
-    print 'Intent ID ' + ai_response_dict['metadata']['intentId']
+    ai_intent_id = ai_response_dict['metadata']['intentId']
 
     data = {'from': sms_from,
             'original-body': sms_body,
             'original-language': language_id,
             'translated-body': translated_body,
+            'intentId': ai_intent_id,
             'time': sms_time}
 
     json_data = json.dumps(data)
@@ -141,7 +142,7 @@ def handle_wave():
     return str('lame')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=80, debug=True)
 
 
 # vi:set expandtab sts=4 sw=4:
