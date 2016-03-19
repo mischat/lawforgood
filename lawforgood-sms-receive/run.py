@@ -67,7 +67,7 @@ def handle_key():
     """Handle key press from a user."""
 
     digit_pressed = request.values.get('Digits', None)
-    if digit_pressed == '2':
+    if digit_pressed == '1':
         resp = twilio.twiml.Response()
         resp.say('Record your message after the tone and please press the hash key to stop recording')
         resp.record(maxLength='30', action='/handle-recording', finishOnKey='#', transcribe='true')
