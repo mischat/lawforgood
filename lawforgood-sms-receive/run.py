@@ -129,9 +129,17 @@ def handle_recording():
 
     print output
 
-    curl_wav = os.popen('curl -k -F "request={\'timezone\':\'Europe/London\',\'lang\':\'en\'};type=application/json" -F "voiceData=@/tmp/working.' + epoch_filename + ';type=audio/wav" -H "Authorization: Bearer 0e010641a9db48eb8f53079054de0526" -H "ocp-apim-subscription-key: 5c0f3443-00dd-4da5-8a19-f39d8b934956" "https://api.api.ai/v1/query?v=20150910"').read()
+    ai_response = os.popen('curl -k -F "request={\'timezone\':\'Europe/London\',\'lang\':\'en\'};type=application/json" -F "voiceData=@/tmp/working.' + epoch_filename + ';type=audio/wav" -H "Authorization: Bearer 0e010641a9db48eb8f53079054de0526" -H "ocp-apim-subscription-key: 5c0f3443-00dd-4da5-8a19-f39d8b934956" "https://api.api.ai/v1/query?v=20150910"').read()
 
-    print curl_wav
+    print ai_response
+    ai_response_dict = json.loads(ai_response)
+
+    ai_intent_id = ''
+    try:
+        ai_intent_id = ai_response_dict['result']['metadata']['intentId']
+    except KeyError:
+        # Key is not present
+        pass
 
     conn = tinys3.Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,tls=True,endpoint='s3-eu-west-1.amazonaws.com')
 
@@ -140,36 +148,22 @@ def handle_recording():
 
     os.remove('/tmp/' + epoch_filename)
     os.remove('/tmp/working.' + epoch_filename)
+
+    wav_s3_url = 'https://s3-eu-west-1.amazonaws.com/mischatlawaudio/' + epoch_filename
+
+    sms_from = str(request.args['From'])
+    sms_time = str(datetime.datetime.utcnow().isoformat())
+
+    data = {'from': 'tel:' + sms_from,
+            'wav-url': wav_s3_url,
+            'intentId': ai_intent_id,
+            'time': sms_time}
+
+    json_data = json.dumps(data)
+    print(json_data)
 
     return str(resp)
 
-
-@app.route('/wav', methods=['GET', 'POST'])
-def handle_wave():
-
-    epoch_filename = str(time.time()) + '.wav'
-
-    wave_url = 'https://api.twilio.com/2010-04-01/Accounts/ACa8e6432e82557adb5a48fc44b32b963b/Recordings/REf479e71030485db784f5aa8fb72fd45f'
-
-    urllib.urlretrieve(wave_url, '/tmp/' + epoch_filename)
-
-    output = os.popen('/usr/local/bin/sox /tmp/' + epoch_filename + ' -r 16000 /tmp/working.' + epoch_filename).read()
-
-    print output
-
-    curl_wav = os.popen('curl -k -F "request={\'timezone\':\'Europe/London\',\'lang\':\'en\'};type=application/json" -F "voiceData=@/tmp/working.' + epoch_filename + ';type=audio/wav" -H "Authorization: Bearer 0e010641a9db48eb8f53079054de0526" -H "ocp-apim-subscription-key: 5c0f3443-00dd-4da5-8a19-f39d8b934956" "https://api.api.ai/v1/query?v=20150910"').read()
-
-    print curl_wav
-
-    conn = tinys3.Connection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY,tls=True,endpoint='s3-eu-west-1.amazonaws.com')
-
-    f = open('/tmp/working.' + epoch_filename, 'rb')
-    conn.upload(epoch_filename, f, 'mischatlawaudio')
-
-    os.remove('/tmp/' + epoch_filename)
-    os.remove('/tmp/working.' + epoch_filename)
-
-    return str('lame')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=80, debug=True)
