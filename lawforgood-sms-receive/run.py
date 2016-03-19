@@ -52,7 +52,7 @@ def hello_monkey():
         # Key is not present
         pass
 
-    data = {'from': sms_from,
+    data = {'from': 'tel:' + sms_from,
             'original-body': sms_body,
             'original-language': language_id,
             'translated-body': translated_body,
