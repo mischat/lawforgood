@@ -1,5 +1,5 @@
 #!venv/bin/python
-
+import requests
 from flask import Flask, request, redirect, jsonify
 import twilio.twiml
 from twilio.rest import TwilioRestClient
@@ -111,6 +111,8 @@ def handle_sms():
 
     sender = Mailer('smtp.gmail.com', use_tls=True, usr=GMAIL_USER, pwd=GMAIL_PASSWORD)
     sender.send(message)
+
+    requests.post('https://hackneylawclassifier.herokuapp.com/receive', data=data)
 
     reply = 'Hello, thank you for getting in contact, we understand your distress, someone will be in contact soon!'
 
