@@ -112,8 +112,11 @@ def handle_sms():
     sender = Mailer('smtp.gmail.com', use_tls=True, usr=GMAIL_USER, pwd=GMAIL_PASSWORD)
     sender.send(message)
 
-    requests.post('https://hackneylawclassifier.herokuapp.com/receive', data=data)
-
+    try:
+        requests.post('https://hackneylawclassifier.herokuapp.com/receive', data=data)
+    except:
+        pass
+    
     reply = 'Hello, thank you for getting in contact, we understand your distress, someone will be in contact soon!'
 
     gt = service.translations().list(
