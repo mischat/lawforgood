@@ -106,7 +106,7 @@ def handle_sms():
 
     message = Message(From='hackneylaw@mmt.me.uk',
                       To=TRELLO_EMAIL)
-    message.Subject = "For trello"
+    message.Subject = 'Incoming call from' + sms_from + ' at ' + sms_time
     message.Html = json_data
 
     sender = Mailer('smtp.gmail.com', use_tls=True, usr=GMAIL_USER, pwd=GMAIL_PASSWORD)
@@ -206,6 +206,14 @@ def handle_recording():
 
     json_data = json.dumps(data)
     print(json_data)
+
+    message = Message(From='hackneylaw@mmt.me.uk',
+                      To=TRELLO_EMAIL)
+    message.Subject = 'Incoming call from' + sms_from + ' at ' + sms_time
+    message.Html = json_data
+
+    sender = Mailer('smtp.gmail.com', use_tls=True, usr=GMAIL_USER, pwd=GMAIL_PASSWORD)
+    sender.send(message)
 
     return str(resp)
 
