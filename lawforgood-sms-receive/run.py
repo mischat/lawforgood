@@ -69,8 +69,8 @@ def handle_key():
     digit_pressed = request.values.get('Digits', None)
     if digit_pressed == '2':
         resp = twilio.twiml.Response()
-        resp.say('Record your message after the tone.')
-        resp.record(maxLength='30', action='/handle-recording')
+        resp.say('Record your message after the tone and please press the hash key to stop recording')
+        resp.record(maxLength='30', action='/handle-recording', finishOnKey='#', transcribe='true')
         return str(resp)
 
     # If the caller pressed anything but 1, redirect them to the homepage.
