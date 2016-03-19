@@ -35,10 +35,17 @@ def hello_monkey():
             'time': sms_time}
 
     json_data = json.dumps(data)
-
     print(json_data)
+
+    reply = 'Hello, thank you for getting in contact, we understand your distress, someone will be in contact soon!'
+
+    gt = service.translations().list(
+        target=language_id,
+        q=[reply]
+    ).execute()
+
     resp = twilio.twiml.Response()
-    resp.message('Hello, Mobile Monkey')
+    resp.message(gt['translations'][0]['translatedText'])
     return str(resp)
 
 
