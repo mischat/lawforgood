@@ -101,17 +101,16 @@ def handle_sms():
             'intentId': ai_intent_id,
             'time': sms_time}
 
-    message = Message(From='me@example.com',
-                      To='lame@mmt.me.uk')
-    message.Subject = "An Email"
-    message.Html = """
-       Yo TEST"""
+    json_data = json.dumps(data)
+    print(json_data)
+
+    message = Message(From='hackneylaw@mmt.me.uk',
+                      To=TRELLO_EMAIL)
+    message.Subject = "For trello"
+    message.Html = json_data
 
     sender = Mailer('smtp.gmail.com', use_tls=True, usr=GMAIL_USER, pwd=GMAIL_PASSWORD)
     sender.send(message)
-
-    json_data = json.dumps(data)
-    print(json_data)
 
     reply = 'Hello, thank you for getting in contact, we understand your distress, someone will be in contact soon!'
 
