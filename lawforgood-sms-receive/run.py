@@ -1,11 +1,15 @@
 #!venv/bin/python
 
-from flask import Flask, request, redirect
+from flask import Flask, request
 import twilio.twiml
 import datetime
 import json
- 
+from googleapiclient.discovery import build
+
 app = Flask(__name__)
+
+service = build('translate', 'v2',
+            developerKey='YOUR_GOOGLE_TRANSLATE_API_KEY_HERE')
 
 
 @app.route('/sms/reply', methods=['GET', 'POST'])
@@ -16,12 +20,23 @@ def hello_monkey():
     sms_from = str(request.args['From'])
     sms_time = str(datetime.datetime.utcnow().isoformat())
 
-    data = {'from': sms_from, 'body': sms_body, 'time': sms_time}
+    gt = service.translations().list(
+      target='en',
+      q=[sms_body]
+    ).execute()
+
+    language_id = gt['translations'][0]['detectedSourceLanguage']
+    translated_body = gt['translations'][0]['translatedText']
+
+    data = {'from': sms_from,
+            'original-body': sms_body,
+            'original-language': language_id,
+            'translated-body': translated_body,
+            'time': sms_time}
+
     json_data = json.dumps(data)
 
-    print 'JSON: ' + json_data
-
-    print('Message "' + sms_body + '" from " ' + sms_from + ' ' + sms_time)
+    print(json_data)
     resp = twilio.twiml.Response()
     resp.message('Hello, Mobile Monkey')
     return str(resp)
