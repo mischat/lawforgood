@@ -26,7 +26,7 @@ AWS_ACCESS_KEY_ID = 'YOUR_AWS_ACCESS_KEY_ID_HERE'
 AWS_SECRET_ACCESS_KEY = 'YOUR_AWS_SECRET_ACCESS_KEY_HERE'
 
 service = build('translate', 'v2',
-                developerKey=)
+                developerKey=YOUR_GOOGLE_TRANSLATE_API_KEY_HERE)
 
 
 @app.route('/sms/reply', methods=['GET', 'POST'])
