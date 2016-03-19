@@ -87,7 +87,7 @@ def handle_voice():
     resp.say('Hello, welcome to the Hackney Community Law Center')
 
     with resp.gather(numDigits=1, action='/handle-key', method='POST') as g:
-        g.say("""To record a voice message in English please press 1 otherwise please text us in the language of your choice to 01253531170 thanks you""")
+        g.say("""To record a voice message in English please press 1 otherwise please text us in the language of your choice to 01253531170 thank you""")
 
     return str(resp)
 
@@ -151,7 +151,7 @@ def handle_recording():
 
     wav_s3_url = 'https://s3-eu-west-1.amazonaws.com/mischatlawaudio/' + epoch_filename
 
-    sms_from = str(request.args['From'])
+    sms_from = str(request.values.get('From', None))
     sms_time = str(datetime.datetime.utcnow().isoformat())
 
     data = {'from': 'tel:' + sms_from,
