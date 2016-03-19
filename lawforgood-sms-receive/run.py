@@ -83,7 +83,7 @@ def handle_key():
 
 
 @app.route('/handle-transcribe', methods=['GET', 'POST'])
-def handle_recording():
+def handle_transcribe():
     """Play back the caller's recording."""
 
     transcription_text = request.values.get('TranscriptionText', None)
