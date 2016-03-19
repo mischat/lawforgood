@@ -11,6 +11,9 @@ import os
 import time
 import apiai
 import tinys3
+from mailer import Mailer
+from mailer import Message
+
 
 app = Flask(__name__)
 
@@ -24,6 +27,11 @@ AWS_SECRET_ACCESS_KEY = 'YOUR_AWS_SECRET_ACCESS_KEY_HERE'
 
 SMS_ACCOUNT_SID = 'YOUR_SMS_ACCOUNT_SID_HERE'
 SMS_AUTH_TOKEN = 'YOUR_SMS_AUTH_TOKEN_HERE'
+
+TRELLO_EMAIL = 'hackneylaw+kgy0nw2d5dxmvoxeqnfo@boards.trello.com'
+
+GMAIL_USER = 'YOUR_GMAIL_USER_HERE'
+GMAIL_PASSWORD = 'YOUR_GMAIL_PASSWORD_HERE'
 
 service = build('translate', 'v2',
                 developerKey=GOOGLE_TRANSLATE_API_KEY)
@@ -92,6 +100,15 @@ def handle_sms():
             'translated-body': translated_body,
             'intentId': ai_intent_id,
             'time': sms_time}
+
+    message = Message(From='me@example.com',
+                      To='lame@mmt.me.uk')
+    message.Subject = "An Email"
+    message.Html = """
+       Yo TEST"""
+
+    sender = Mailer('smtp.gmail.com', use_tls=True, usr=GMAIL_USER, pwd=GMAIL_PASSWORD)
+    sender.send(message)
 
     json_data = json.dumps(data)
     print(json_data)
