@@ -54,10 +54,12 @@ def voice_hello_monkey():
     """Respond to incoming calls with a simple text message."""
 
     resp = twilio.twiml.Response()
-    resp.say('Hello, This is Hackney Law Help Center')
+    resp.say('Hello, welcome to the Hackney Community Law Center')
 
     with resp.gather(numDigits=1, action='/handle-key', method='POST') as g:
-        g.say("""To record a message press 1""")
+        g.say("""To record a voice message in English please press 1
+              otherwise please text us in the language of your choice to
+                01253531170 thanks you""")
 
     return str(resp)
 
@@ -71,10 +73,8 @@ def handle_key():
         resp = twilio.twiml.Response()
         resp.say('Record your message after the tone and please press the hash key to stop recording')
         resp.record(maxLength='30',
-                    #action='/handle-recording',
-                    transcribeCallback='/handle-transcribe',
-                    finishOnKey='#',
-                    transcribe='true')
+                    action='/handle-recording',
+                    finishOnKey='#')
         return str(resp)
 
     # If the caller pressed anything but 1, redirect them to the homepage.
@@ -82,31 +82,12 @@ def handle_key():
         return redirect('/voice/reply')
 
 
-@app.route('/handle-transcribe', methods=['GET', 'POST'])
-def handle_transcribe():
-    """Play back the caller's recording."""
-
-    transcription_text = request.values.get('TranscriptionText', None)
-    recording_url = request.values.get('RecordingUrl', None)
-    recording_url_mp3 = recording_url + '.mp3'
-
-    print('This is the recording of the phone call ' + recording_url_mp3)
-    print('This is the transcription text ' + transcription_text)
-
-    resp = twilio.twiml.Response()
-    resp.say('Thanks for recording ... take a listen to what you howled.')
-    resp.play(recording_url)
-    resp.say('Goodbye.')
-    return str(resp)
-
-
 @app.route('/handle-recording', methods=['GET', 'POST'])
 def handle_recording():
     """Play back the caller's recording."""
 
     recording_url = request.values.get('RecordingUrl', None)
-    recording_url_mp3 = recording_url + '.mp3'
-    print('This is the recording of the phone call ' + recording_url_mp3)
+    print('This is the recording of the phone call ' + recording_url)
 
     resp = twilio.twiml.Response()
     resp.say('Thanks for recording ... take a listen to what you howled.')
