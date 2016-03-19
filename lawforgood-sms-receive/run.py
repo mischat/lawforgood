@@ -5,11 +5,19 @@ import twilio.twiml
 import datetime
 import json
 from googleapiclient.discovery import build
+import urllib
+import os
+import time
+import apiai
+
 
 app = Flask(__name__)
 
 service = build('translate', 'v2',
                 developerKey='YOUR_GOOGLE_TRANSLATE_API_KEY_HERE')
+
+CLIENT_ACCESS_TOKEN = 'YOUR_AI_API_CLIENT_ACCESS_TOKEN_HERE'
+SUBSCRIPTION_KEY = 'YOUR_AI_API_SUBSCRIPTION_KEY_HERE'
 
 
 @app.route('/sms/reply', methods=['GET', 'POST'])
@@ -27,6 +35,17 @@ def hello_monkey():
 
     language_id = gt['translations'][0]['detectedSourceLanguage']
     translated_body = gt['translations'][0]['translatedText']
+
+    ai = apiai.ApiAI(CLIENT_ACCESS_TOKEN, SUBSCRIPTION_KEY)
+    ai_request = ai.text_request()
+    ai_request.lang = 'en'
+
+    ai_request.query = translated_body
+
+    ai_response = ai_request.getresponse()
+    ai_response_dict = json.loads(ai_response)
+
+    print 'Intent ID ' + ai_response_dict['metadata']['intentId']
 
     data = {'from': sms_from,
             'original-body': sms_body,
@@ -90,14 +109,39 @@ def handle_recording():
     print('This is the recording of the phone call ' + recording_url)
 
     resp = twilio.twiml.Response()
-    resp.say('Thanks for recording ... take a listen to what you howled.')
+    resp.say('Thanks for leaving us a message ... take a listen to what you recorded.')
     resp.play(recording_url)
     resp.say('Goodbye.')
+
+    #here we create the JSON for Tom
+
     return str(resp)
 
 
+@app.route('/wav', methods=['GET', 'POST'])
+def handle_wave():
+
+    epoch_filename = str(time.time()) + '.wav'
+
+    wave_url = 'https://api.twilio.com/2010-04-01/Accounts/ACa8e6432e82557adb5a48fc44b32b963b/Recordings/REf479e71030485db784f5aa8fb72fd45f'
+
+    urllib.urlretrieve(wave_url, '/tmp/' + epoch_filename )
+
+    output = os.popen('/usr/local/bin/sox /tmp/' + epoch_filename + ' -r 16000 /tmp/working.' + epoch_filename).read()
+
+    print output
+
+    curl_wav = os.popen('curl -k -F "request={\'timezone\':\'America/New_York\',\'lang\':\'en\'};type=application/json" -F "voiceData=@/tmp/working.' + epoch_filename + ';type=audio/wav" -H "Authorization: Bearer 0e010641a9db48eb8f53079054de0526" -H "ocp-apim-subscription-key: 5c0f3443-00dd-4da5-8a19-f39d8b934956" "https://api.api.ai/v1/query?v=20150910"').read()
+
+    print curl_wav
+
+    os.remove('/tmp/' + epoch_filename)
+    os.remove('/tmp/working.' + epoch_filename)
+
+    return str('lame')
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
 
 
 # vi:set expandtab sts=4 sw=4:
